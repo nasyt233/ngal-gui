@@ -3,7 +3,7 @@ name: Build and Release
 on:
   push:
     tags:
-      - 'ngal-gui-gui-*'
+      - 'ngal-gui-*'
   workflow_dispatch:
 
 permissions:
@@ -33,6 +33,14 @@ jobs:
             bin_name: ngal-gui
             ext: ''
             use_zig: true
+
+          # ---------- Linux (glibc 动态) ----------
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            target_name: linux-amd64-gnu
+            bin_name: ngal-gui
+            ext: ''
+            use_zig: false
 
           # ---------- Windows ----------
           - os: windows-latest
@@ -78,6 +86,15 @@ jobs:
       - name: Install cargo-zigbuild
         if: matrix.use_zig
         run: cargo install cargo-zigbuild --locked
+
+      - name: Install Linux GUI deps (gnu)
+        if: matrix.target == 'x86_64-unknown-linux-gnu'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libx11-dev libxcursor-dev libxrandr-dev libxi-dev \
+            libxkbcommon-dev libxkbcommon-x11-dev \
+            libwayland-dev libgl1-mesa-dev
 
       - name: Cache cargo build
         uses: Swatinem/rust-cache@v2
@@ -152,7 +169,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: artifacts
-          merge-merge: true
           merge-multiple: true
 
       - name: List artifacts
