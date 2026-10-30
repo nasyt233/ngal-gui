@@ -1,0 +1,8 @@
+{
+  "title": "Ngal 视觉小说引擎",
+  "logo": "logo.png",
+  "background": "bg.png",
+  "bgm": "bg.mp3",
+  "index": "dialogue.ng",
+  "menu_layout": 2
+}

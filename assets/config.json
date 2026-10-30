@@ -1,0 +1,9 @@
+{
+  "fullscreen": false,
+  "window_width": 1280,
+  "window_height": 720,
+  "text_speed": 25.0,
+  "bgm_volume": 0.7,
+  "voice_volume": 1.0,
+  "dialog_opacity": 0.85
+}
