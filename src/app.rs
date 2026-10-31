@@ -322,7 +322,7 @@ impl NgalApp {
             speaker: self.speaker.clone(),
             preview_text: self.typewriter.visible_text(),
             line_index: self.line_index,
-            background_path: self.current_bg_path.clone(), // 已修复：正确保存背景缩略图路径
+            background_path: self.current_bg_path.clone(),
             portrait_path: None,
         }
     }
@@ -368,7 +368,7 @@ fn ensure_asset_structure() {
 
     let dialogue_ng_path = "assets/dialog/dialogue.ng";
     if !Path::new(dialogue_ng_path).exists() || std::fs::metadata(dialogue_ng_path).map(|m| m.len() == 0).unwrap_or(true) {
-        let default_story = r#"# ngal v1.0.4示例教学默认剧情
+        let default_story = r#"# ngal 示例教学默认剧情
 [welcome]
 第一章
 load:index

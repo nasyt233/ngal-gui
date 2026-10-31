@@ -13,7 +13,7 @@ pub struct Config {
     pub text_speed: f32,
     pub bgm_volume: f32,
     pub voice_volume: f32,
-    pub dialog_opacity: f32, // 新增：对话框窗口透明度 (0.0 ~ 1.0)
+    pub dialog_opacity: f32,
 }
 
 impl Default for Config {
@@ -25,7 +25,7 @@ impl Default for Config {
             text_speed: 25.0,
             bgm_volume: 0.7,
             voice_volume: 1.0,
-            dialog_opacity: 0.85, // 默认半透明
+            dialog_opacity: 0.85,
         }
     }
 }

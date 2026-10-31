@@ -146,7 +146,7 @@ impl StoryParser {
                     bg_path: active_bg.clone(), portrait_path: active_portrait.clone(),
                     portrait_pos: active_portrait_pos, portrait_scale: active_portrait_scale,
                     music_path: active_music.clone(), voice_path: None,
-                    choices: vec![], // 修复类型匹配
+                    choices: vec![],
                     command_action: Some(CommandAction::Sleep(secs)),
                 });
             } else if clean_line.starts_with("load:") {
@@ -166,7 +166,7 @@ impl StoryParser {
                     bg_path: active_bg.clone(), portrait_path: active_portrait.clone(),
                     portrait_pos: active_portrait_pos, portrait_scale: active_portrait_scale,
                     music_path: active_music.clone(), voice_path: None,
-                    choices: vec![], // 修复类型匹配
+                    choices: vec![],
                     command_action: Some(CommandAction::Load { file, target_label }),
                 });
             } else if clean_line.starts_with("choose:") {

@@ -97,7 +97,7 @@ impl NgalApp {
     }
 }
 
-// 使用普通函数代替宏，完美解决闭包类型推导问题 (E0282)
+// 使用普通函数代替宏
 fn draw_setting_row(ui: &mut egui::Ui, label: &str, row_height: f32, widget: impl FnOnce(&mut egui::Ui)) {
     let row_rect = ui.allocate_space(Vec2::new(ui.available_width(), row_height)).1;
     ui.allocate_new_ui(UiBuilder::new().max_rect(row_rect), |ui| {
