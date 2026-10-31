@@ -14,6 +14,8 @@ pub struct Config {
     pub bgm_volume: f32,
     pub voice_volume: f32,
     pub dialog_opacity: f32,
+    pub menu_opacity: f32,
+    pub show_fps: bool,
 }
 
 impl Default for Config {
@@ -26,6 +28,8 @@ impl Default for Config {
             bgm_volume: 0.7,
             voice_volume: 1.0,
             dialog_opacity: 0.85,
+            menu_opacity: 0.65,
+            show_fps: false,
         }
     }
 }
@@ -63,6 +67,7 @@ pub struct GameConfig {
     pub bgm: String,
     pub index: String,
     pub menu_layout: i32,
+    pub splash_screens: Vec<String>,
 }
 
 impl Default for GameConfig {
@@ -74,6 +79,7 @@ impl Default for GameConfig {
             bgm: "bg.mp3".to_string(),
             index: "dialogue.ng".to_string(),
             menu_layout: 1,
+            splash_screens: vec!["logo.png".to_string()],
         }
     }
 }
@@ -90,7 +96,6 @@ impl GameConfig {
                 .and_then(|s| serde_json::from_str(&s).ok())
                 .unwrap_or_default()
         };
-        // 自动补全缺失字段并写回文件
         cfg.save(path);
         cfg
     }

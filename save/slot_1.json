@@ -1,0 +1,24 @@
+{
+  "state": {
+    "InDialogue": {
+      "scene_id": "index",
+      "cmd_index": 18
+    }
+  },
+  "menu_selected": 0,
+  "variables": {
+    "name": "嘉豪"
+  },
+  "current_image": "assets/portraits/logo2.png",
+  "timestamp": "2026-10-31 07:16:31",
+  "current_file": "assets/dialog/dialogue.ng",
+  "background": "assets/portraits/bg.png",
+  "bgm": null,
+  "image_params": {
+    "filename": "assets/portraits/logo2.png",
+    "position": 2,
+    "scale": 50.0
+  },
+  "preview_text": "请输入你的名字",
+  "background_path": "assets/portraits/bg.png"
+}

@@ -84,12 +84,16 @@ impl StoryParser {
             // 2. 指令解析
             if clean_line.starts_with("bg:") {
                 let val = clean_line[3..].trim();
-                active_bg = if val.is_empty() { None } else { Some(format!("assets/portraits/{}", val)) };
+                active_bg = if val.is_empty() {
+                    None
+                } else {
+                    Some(format!("assets/portraits/{}", val))
+                };
                 nodes.push(ScriptNode {
                     label: current_label.clone(),
                     speaker: None, text: None,
-                    bg_path: active_bg.clone(),
-                    portrait_path: active_portrait.clone(),
+                    bg_path: active_bg.clone().or_else(|| Some("".to_string())),
+                    portrait_path: active_portrait.clone().or_else(|| Some("".to_string())),
                     portrait_pos: active_portrait_pos,
                     portrait_scale: active_portrait_scale,
                     music_path: active_music.clone(),
@@ -111,7 +115,7 @@ impl StoryParser {
                     choices: vec![], command_action: None,
                 });
             } else if clean_line.starts_with("img:") {
-                let val = &clean_line[4..].trim();
+                let val = clean_line[4..].trim();
                 if val.is_empty() {
                     active_portrait = None;
                 } else {
@@ -130,8 +134,8 @@ impl StoryParser {
                 nodes.push(ScriptNode {
                     label: current_label.clone(),
                     speaker: None, text: None,
-                    bg_path: active_bg.clone(),
-                    portrait_path: active_portrait.clone(),
+                    bg_path: active_bg.clone().or_else(|| Some("".to_string())),
+                    portrait_path: active_portrait.clone().or_else(|| Some("".to_string())),
                     portrait_pos: active_portrait_pos,
                     portrait_scale: active_portrait_scale,
                     music_path: active_music.clone(),

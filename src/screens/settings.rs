@@ -43,7 +43,7 @@ impl NgalApp {
 
             // 3. 设置面板卡片
             let panel_w = 640.0_f32.min(rect.width() - 60.0);
-            let panel_h = 500.0_f32.min(rect.height() - 100.0);
+            let panel_h = 520.0_f32.min(rect.height() - 100.0);
             let panel_rect = Rect::from_center_size(rect.center() + Vec2::new(0.0, 15.0), Vec2::new(panel_w, panel_h));
 
             ui.painter().rect_filled(panel_rect, 12.0, Color32::from_rgba_premultiplied(25, 30, 48, 235));
@@ -90,6 +90,14 @@ impl NgalApp {
                         draw_setting_row(ui, "对话框透明度 (Dialog Opacity)", row_height, |ui| {
                             ui.add(egui::Slider::new(&mut self.config.dialog_opacity, 0.1..=1.0).text("透明度"));
                         });
+
+                        draw_setting_row(ui, "主菜单透明度 (Menu Opacity)", row_height, |ui| {
+                            ui.add(egui::Slider::new(&mut self.config.menu_opacity, 0.1..=1.0).text("透明度"));
+                        });
+                        
+                        draw_setting_row(ui, "性能监视器 (FPS & Memory)", row_height, |ui| {
+                            ui.checkbox(&mut self.config.show_fps, "");
+                        });
                     });
                 },
             );
@@ -97,7 +105,7 @@ impl NgalApp {
     }
 }
 
-// 使用普通函数代替宏
+// 辅助行渲染函数
 fn draw_setting_row(ui: &mut egui::Ui, label: &str, row_height: f32, widget: impl FnOnce(&mut egui::Ui)) {
     let row_rect = ui.allocate_space(Vec2::new(ui.available_width(), row_height)).1;
     ui.allocate_new_ui(UiBuilder::new().max_rect(row_rect), |ui| {

@@ -7,23 +7,29 @@ impl NgalApp {
     pub(crate) fn draw_saveload(&mut self, ctx: &egui::Context, is_save: bool) {
         let title = if is_save { "保存游戏 (Save Game)" } else { "读取游戏 (Load Game)" };
 
+        if self.saveload_cache_dirty {
+            self.save_slots_cache.clear();
+            self.save_thumb_cache.clear();
+            
+            let mut slots = vec![99];
+            slots.extend(1..=16);
+
+            for slot in slots {
+                let data = SaveData::load_from_slot(slot);
+                self.save_slots_cache.insert(slot, data);
+                // 初始时将图片纹理设为 None，采用按需懒加载
+                self.save_thumb_cache.insert(slot, None);
+            }
+            self.saveload_cache_dirty = false;
+        }
+
         egui::CentralPanel::default().show(ctx, |ui| {
             let rect = ui.max_rect();
 
-            // 1. 绘制背景
-            if let Some(tex) = &self.background {
-                ui.painter().image(
-                    tex.id(),
-                    rect,
-                    Rect::from_min_max(Pos2::ZERO, Pos2::new(1.0, 1.0)),
-                    Color32::WHITE,
-                );
-                ui.painter().rect_filled(rect, 0.0, Color32::from_black_alpha(200));
-            } else {
-                ui.painter().rect_filled(rect, 0.0, Color32::from_rgb(16, 18, 30));
-            }
+            // 纯色填充背景，零性能开销
+            ui.painter().rect_filled(rect, 0.0, Color32::from_rgb(14, 16, 26));
 
-            // 2. 顶栏 (标题与返回按钮)
+            // 顶栏 (标题与返回按钮)
             ui.allocate_new_ui(
                 egui::UiBuilder::new().max_rect(Rect::from_min_size(rect.min + Vec2::new(30.0, 20.0), Vec2::new(rect.width() - 60.0, 50.0))),
                 |ui| {
@@ -39,7 +45,7 @@ impl NgalApp {
                 },
             );
 
-            // 3. 存档槽位卡片网格滚动区 (16个普通槽 + 1个快速存档)
+            // 存档槽位网格渲染
             let content_rect = Rect::from_min_max(
                 rect.min + Vec2::new(30.0, 85.0),
                 rect.max - Vec2::new(30.0, 25.0),
@@ -50,8 +56,10 @@ impl NgalApp {
                 |ui| {
                     egui::ScrollArea::vertical().show(ui, |ui| {
                         ui.add_space(5.0);
-                        let mut slots: Vec<usize> = (1..=16).collect();
-                        slots.push(99); // 快速存档槽位
+                        
+                        // 顺序保持：99 在前，1~16 在后
+                        let mut slots = vec![99];
+                        slots.extend(1..=16);
 
                         let available_w = ui.available_width();
                         let card_w = (available_w - 15.0).max(400.0) / 2.0;
@@ -60,9 +68,28 @@ impl NgalApp {
                             ui.horizontal(|ui| {
                                 for &slot in chunk {
                                     let slot_name = if slot == 99 { "快速存档 (Quick Save)".to_string() } else { format!("存档槽位 {:02}", slot) };
-                                    let save_data = SaveData::load_from_slot(slot);
+                                    
+                                    let save_data = self.save_slots_cache.get(&slot).cloned().flatten();
+                                    
+                                    let thumb_tex = match self.save_thumb_cache.get(&slot) {
+                                        Some(Some(tex)) => Some(tex.clone()),
+                                        Some(None) => {
+                                            // 尚未加载过，尝试按需加载
+                                            if let Some(ref data) = save_data {
+                                                if let Some(ref bg_path) = data.background_path {
+                                                    let loaded = load_texture(ctx, bg_path);
+                                                    self.save_thumb_cache.insert(slot, loaded.clone());
+                                                    loaded
+                                                } else {
+                                                    None
+                                                }
+                                            } else {
+                                                None
+                                            }
+                                        }
+                                        None => None,
+                                    };
 
-                                    // 使用 egui::Frame::NONE、corner_radius 及带 _f32 的 Stroke
                                     egui::Frame::NONE
                                         .fill(Color32::from_rgba_premultiplied(24, 30, 45, 235))
                                         .stroke(Stroke::new(1.0_f32, Color32::from_rgb(60, 100, 150)))
@@ -77,28 +104,21 @@ impl NgalApp {
                                                 let thumb_size = Vec2::new(120.0, 95.0);
                                                 let (thumb_rect, _) = ui.allocate_exact_size(thumb_size, egui::Sense::hover());
                                                 
-                                                if let Some(ref data) = save_data {
-                                                    if let Some(ref bg_path) = data.background_path {
-                                                        if let Some(tex) = load_texture(ctx, bg_path) {
-                                                            ui.painter().image(
-                                                                tex.id(),
-                                                                thumb_rect,
-                                                                Rect::from_min_max(Pos2::ZERO, Pos2::new(1.0, 1.0)),
-                                                                Color32::WHITE,
-                                                            );
-                                                        } else {
-                                                            ui.painter().rect_filled(thumb_rect, 4.0, Color32::from_rgb(12, 15, 22));
-                                                        }
-                                                    } else {
-                                                        ui.painter().rect_filled(thumb_rect, 4.0, Color32::from_rgb(12, 15, 22));
-                                                    }
+                                                if let Some(tex) = thumb_tex {
+                                                    ui.painter().image(
+                                                        tex.id(),
+                                                        thumb_rect,
+                                                        Rect::from_min_max(Pos2::ZERO, Pos2::new(1.0, 1.0)),
+                                                        Color32::WHITE,
+                                                    );
                                                 } else {
                                                     ui.painter().rect_filled(thumb_rect, 4.0, Color32::from_rgb(12, 15, 22));
+                                                    let tip_text = if save_data.is_some() { "无预览图" } else { "空槽位" };
                                                     ui.painter().text(
                                                         thumb_rect.center(),
                                                         egui::Align2::CENTER_CENTER,
-                                                        "空槽位",
-                                                        FontId::proportional(14.0),
+                                                        tip_text,
+                                                        FontId::proportional(12.0),
                                                         Color32::from_gray(130),
                                                     );
                                                 }
@@ -131,6 +151,7 @@ impl NgalApp {
                                                             if is_save {
                                                                 let new_save = self.create_save_data();
                                                                 let _ = SaveData::save_to_slot(slot, &new_save);
+                                                                self.saveload_cache_dirty = true;
                                                             } else {
                                                                 if let Some(loaded) = SaveData::load_from_slot(slot) {
                                                                     self.load_save_data(loaded, ctx);
@@ -142,6 +163,7 @@ impl NgalApp {
 
                                                         if save_data.is_some() && ui.add_sized(Vec2::new(50.0, 24.0), egui::Button::new("删除")).clicked() {
                                                             let _ = std::fs::remove_file(format!("save/slot_{}.json", slot));
+                                                            self.saveload_cache_dirty = true;
                                                         }
                                                     });
                                                 });

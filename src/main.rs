@@ -6,12 +6,15 @@ mod save;
 mod texture;
 mod typewriter;
 mod ui;
+mod game_logic;
+mod utils;
 
 mod screens {
     pub mod game;
     pub mod menu;
     pub mod saveload;
     pub mod settings;
+    pub mod splash;
 }
 
 use app::NgalApp;

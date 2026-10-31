@@ -1,0 +1,28 @@
+{
+  "state": {
+    "InDialogue": {
+      "scene_id": "exit",
+      "cmd_index": 48
+    }
+  },
+  "menu_selected": 0,
+  "variables": {
+    "score": "5",
+    "c": "91",
+    "name": "999",
+    "a": "13",
+    "b": "78"
+  },
+  "current_image": "assets/portraits/logo2.png",
+  "timestamp": "2026-10-31 07:22:54",
+  "current_file": "assets/dialog/dialogue.ng",
+  "background": "assets/portraits/bg.png",
+  "bgm": null,
+  "image_params": {
+    "filename": "assets/portraits/logo2.png",
+    "position": 2,
+    "scale": 50.0
+  },
+  "preview_text": "",
+  "background_path": "assets/portraits/bg.png"
+}

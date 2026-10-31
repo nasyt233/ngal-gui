@@ -2,7 +2,7 @@ use crate::app::{NgalApp, Screen};
 use crate::texture::load_texture;
 use crate::save::SaveData;
 use crate::ui::dialog::draw_dialog;
-use eframe::egui::{self, Align2, Color32, FontId, Pos2, Rect, RichText};
+use eframe::egui::{self, Align2, Color32, FontId, Pos2, Rect};
 
 impl NgalApp {
     pub(crate) fn draw_game(&mut self, ctx: &egui::Context) {
@@ -135,31 +135,6 @@ impl NgalApp {
                     );
                 }
             });
-
-        if self.show_log {
-            egui::Window::new("对话历史 Log")
-                .collapsible(false)
-                .resizable(true)
-                .default_size([600.0, 400.0])
-                .show(ctx, |ui| {
-                    egui::ScrollArea::vertical().show(ui, |ui| {
-                        for (speaker, text) in &self.history {
-                            ui.horizontal(|ui| {
-                                ui.label(
-                                    RichText::new(format!("{}: ", speaker))
-                                        .strong()
-                                        .color(Color32::from_rgb(255, 220, 120)),
-                                );
-                                ui.label(text);
-                            });
-                            ui.separator();
-                        }
-                    });
-                    if ui.button("关闭").clicked() {
-                        self.show_log = false;
-                    }
-                });
-        }
 
         let advance_input = ctx.input(|i| i.key_pressed(egui::Key::Enter) || i.pointer.primary_clicked());
         if advance_input && !ui_interacted && !self.show_log && !self.waiting_input && self.sleep_timer <= 0.0 {

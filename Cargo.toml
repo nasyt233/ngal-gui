@@ -1,6 +1,6 @@
 [package]
 name = "ngal-gui"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 description = "一个用 Rust 编写的galgame引擎，ngal引擎的egui版本"
 readme = "README.md"
