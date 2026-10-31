@@ -26,7 +26,7 @@ jobs:
             target_name: linux-arm64
             bin_name: ngal-gui
             ext: ''
-            use_zig: true
+            use_zig: false
             
           - os: ubuntu-22.04
             target: x86_64-unknown-linux-gnu
@@ -42,6 +42,7 @@ jobs:
             bin_name: ngal-gui.exe
             ext: '.exe'
             use_zig: false
+            
           - os: windows-latest
             target: aarch64-pc-windows-msvc
             target_name: win-arm64
@@ -56,6 +57,7 @@ jobs:
             bin_name: ngal-gui
             ext: ''
             use_zig: false
+            
           - os: macos-latest
             target: aarch64-apple-darwin
             target_name: macos-arm64
