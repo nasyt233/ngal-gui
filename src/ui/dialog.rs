@@ -15,90 +15,7 @@ pub fn draw_dialog(ui: &mut Ui, screen: Rect, app: &mut NgalApp, ctx: &egui::Con
     let mut interacted = false;
 
     // ==========================================
-    // 1. 分支选择项
-    // ==========================================
-    if !app.parser.nodes[app.line_index].choices.is_empty() {
-        let choices = app.parser.nodes[app.line_index].choices.clone();
-        let box_height = (choices.len() as f32 * 46.0) + 70.0;
-        let center_rect = Rect::from_center_size(screen.center(), Vec2::new(480.0, box_height));
-
-        ui.painter().rect_filled(center_rect, 12.0, Color32::from_rgba_premultiplied(18, 22, 38, 235));
-        ui.painter().rect_stroke(
-            center_rect,
-            12.0,
-            Stroke::new(1.5_f32, Color32::from_rgb(70, 130, 180)),
-            StrokeKind::Inside,
-        );
-
-        ui.allocate_new_ui(
-            UiBuilder::new().max_rect(center_rect.shrink(20.0)),
-            |ui| {
-                ui.vertical_centered(|ui| {
-                    ui.label(RichText::new("请做出你的选择").size(18.0).strong().color(Color32::from_rgb(255, 220, 90)));
-                    ui.add_space(14.0);
-                    for (text, target) in choices {
-                        let btn = ui.add_sized(
-                            Vec2::new(400.0, 38.0),
-                            egui::Button::new(RichText::new(&text).size(16.0).color(Color32::WHITE)),
-                        );
-                        if btn.clicked() {
-                            interacted = true;
-                            app.jump_to_label(&target, ctx);
-                        }
-                        ui.add_space(6.0);
-                    }
-                });
-            },
-        );
-        return interacted;
-    }
-
-    // ==========================================
-    // 2. 用户输入框
-    // ==========================================
-    if app.waiting_input {
-        let center_rect = Rect::from_center_size(screen.center(), Vec2::new(440.0, 160.0));
-
-        ui.painter().rect_filled(center_rect, 12.0, Color32::from_rgba_premultiplied(18, 22, 38, 235));
-        ui.painter().rect_stroke(
-            center_rect,
-            12.0,
-            Stroke::new(1.5_f32, Color32::from_rgb(70, 130, 180)),
-            StrokeKind::Inside,
-        );
-
-        ui.allocate_new_ui(
-            UiBuilder::new().max_rect(center_rect.shrink(20.0)),
-            |ui| {
-                ui.vertical_centered(|ui| {
-                    // 动态显示脚本中传入的提示文字（如 "请输入你的名字"）
-                    let prompt_title = if app.input_prompt.is_empty() { "请输入内容" } else { &app.input_prompt };
-                    ui.label(RichText::new(prompt_title).size(18.0).strong().color(Color32::from_rgb(255, 220, 90)));
-                    ui.add_space(16.0);
-                    let resp = ui.add(
-                        egui::TextEdit::singleline(&mut app.input_buffer)
-                            .desired_width(360.0)
-                            .font(FontId::proportional(16.0)),
-                    );
-                    ui.add_space(16.0);
-                    if ui.add_sized(Vec2::new(120.0, 32.0), egui::Button::new(RichText::new("确定").size(15.0))).clicked() 
-                        || (resp.lost_focus() && ctx.input(|i| i.key_pressed(egui::Key::Enter))) 
-                    {
-                        if !app.input_buffer.is_empty() {
-                            app.parser.variables.insert(app.input_var_name.clone(), app.input_buffer.clone());
-                        }
-                        app.waiting_input = false;
-                        app.advance(ctx);
-                        interacted = true;
-                    }
-                });
-            },
-        );
-        return interacted;
-    }
-
-    // ==========================================
-    // 3. 常规对话框（底部区域）
+    // 1. 统一的底部对话框基础计算
     // ==========================================
     let box_height = screen.height() * 0.22;
     let margin = 20.0;
@@ -145,12 +62,67 @@ pub fn draw_dialog(ui: &mut Ui, screen: Rect, app: &mut NgalApp, ctx: &egui::Con
         StrokeKind::Inside,
     );
 
-    // 对话框内部内容
+    // ==========================================
+    // 2. 对话框内部内容区（分支选择 / 用户输入 / 常规对话分流）
+    // ==========================================
     ui.allocate_new_ui(
         UiBuilder::new().max_rect(dialog_rect.shrink(18.0)),
         |ui| {
+            // A. 分支选择项状态
+            if !app.parser.nodes[app.line_index].choices.is_empty() {
+                let choices = app.parser.nodes[app.line_index].choices.clone();
+                ui.vertical(|ui| {
+                    ui.label(RichText::new("请做出你的选择").size(15.0).strong().color(Color32::from_rgb(255, 220, 90)));
+                    ui.add_space(8.0);
+                    
+                    // 用横向或网格排布选项，完美嵌入底部对话框内
+                    ui.horizontal_wrapped(|ui| {
+                        for (text, target) in choices {
+                            let btn = ui.add_sized(
+                                Vec2::new(280.0, 32.0),
+                                egui::Button::new(RichText::new(&text).size(14.0).color(Color32::WHITE)),
+                            );
+                            if btn.clicked() {
+                                interacted = true;
+                                app.jump_to_label(&target, ctx);
+                            }
+                        }
+                    });
+                });
+                return;
+            }
+
+            // B. 用户输入框状态
+            if app.waiting_input {
+                ui.vertical(|ui| {
+                    let prompt_title = if app.input_prompt.is_empty() { "请输入内容" } else { &app.input_prompt };
+                    ui.label(RichText::new(prompt_title).size(15.0).strong().color(Color32::from_rgb(255, 220, 90)));
+                    ui.add_space(8.0);
+
+                    ui.horizontal(|ui| {
+                        let resp = ui.add(
+                            egui::TextEdit::singleline(&mut app.input_buffer)
+                                .desired_width(320.0)
+                                .font(FontId::proportional(15.0)),
+                        );
+                        
+                        if ui.add_sized(Vec2::new(75.0, 30.0), egui::Button::new(RichText::new("确定").size(14.0))).clicked() 
+                            || (resp.lost_focus() && ctx.input(|i| i.key_pressed(egui::Key::Enter))) 
+                        {
+                            if !app.input_buffer.is_empty() {
+                                app.parser.variables.insert(app.input_var_name.clone(), app.input_buffer.clone());
+                            }
+                            app.waiting_input = false;
+                            app.advance(ctx);
+                            interacted = true;
+                        }
+                    });
+                });
+                return;
+            }
+
+            // C. 常规对话框（带右侧功能栏）
             ui.horizontal(|ui| {
-                // 左侧文本正文区域（左上对齐）
                 let available_w = ui.available_width() - 380.0;
                 ui.allocate_new_ui(
                     UiBuilder::new().max_rect(Rect::from_min_size(ui.cursor().min, Vec2::new(available_w.max(100.0), ui.available_height()))),
