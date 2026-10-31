@@ -20,24 +20,17 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # ---------- Linux (musl 静态) ----------
+          # ---------- Linux (glibc 动态) ----------
           - os: ubuntu-22.04
-            target: x86_64-unknown-linux-musl
-            target_name: linux-amd64
-            bin_name: ngal-gui
-            ext: ''
-            use_zig: true
-          - os: ubuntu-22.04
-            target: aarch64-unknown-linux-musl
+            target: aarch64-unknown-linux-gnu
             target_name: linux-arm64
             bin_name: ngal-gui
             ext: ''
             use_zig: true
-
-          # ---------- Linux (glibc 动态) ----------
+            
           - os: ubuntu-22.04
             target: x86_64-unknown-linux-gnu
-            target_name: linux-amd64-gnu
+            target_name: linux-amd64
             bin_name: ngal-gui
             ext: ''
             use_zig: false
@@ -74,20 +67,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Rust toolchain
+      - name: 安装 Rust 工具链
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
 
-      - name: Install Zig
+      - name: 安装 Zig
         if: matrix.use_zig
         uses: mlugg/setup-zig@v2
 
-      - name: Install cargo-zigbuild
+      - name: 安装 cargo-zigbuild
         if: matrix.use_zig
         run: cargo install cargo-zigbuild --locked
 
-      - name: Install Linux GUI deps (gnu)
+      - name: 安装 Linux GUI 依赖 (gnu)
         if: matrix.target == 'x86_64-unknown-linux-gnu'
         run: |
           sudo apt-get update
@@ -96,12 +89,12 @@ jobs:
             libxkbcommon-dev libxkbcommon-x11-dev \
             libwayland-dev libgl1-mesa-dev
 
-      - name: Cache cargo build
+      - name: 缓存 cargo 构建
         uses: Swatinem/rust-cache@v2
         with:
           key: ${{ matrix.target }}
 
-      - name: Get package version
+      - name: 获取软件包版本
         id: version
         shell: bash
         run: |
@@ -113,7 +106,7 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Package version: $VERSION"
 
-      - name: Verify tag matches version
+      - name: 验证标签是否匹配版本
         if: startsWith(github.ref, 'refs/tags/')
         shell: bash
         run: |
@@ -125,15 +118,15 @@ jobs:
           fi
           echo "✅ 版本号一致"
 
-      - name: Build (musl via zig)
+      - name: 构建（通过 zig 使用 musl）
         if: matrix.use_zig
         run: cargo zigbuild --release --target ${{ matrix.target }}
 
-      - name: Build (native)
+      - name: 构建（原生）
         if: '!matrix.use_zig'
         run: cargo build --release --target ${{ matrix.target }}
 
-      - name: Package binary
+      - name: 二进制包
         shell: bash
         run: |
           mkdir -p dist
@@ -149,7 +142,7 @@ jobs:
             file "$DST"
           fi
 
-      - name: Upload artifact
+      - name: 上传文件
         uses: actions/upload-artifact@v4
         with:
           name: ngal-gui-${{ matrix.target_name }}
@@ -157,7 +150,7 @@ jobs:
           if-no-files-found: error
 
   release:
-    name: Create Release
+    name: 创建版本
     needs: build
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
