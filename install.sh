@@ -2,7 +2,7 @@
 set -e
 
 # ============ 项目配置（不同项目只改这里） ============
-APP_NAME="nmcl"
+APP_NAME="ngal-gui"
 GITCODE_REPO="nasyt/ngal-gui"
 GITHUB_REPO="nasyt233/ngal-gui"
 GITCODE_API="https://api.gitcode.com/api/v5/repos/${GITCODE_REPO}/releases/latest"

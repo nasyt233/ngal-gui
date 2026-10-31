@@ -2,6 +2,13 @@
 name = "ngal-gui"
 version = "0.1.0"
 edition = "2021"
+description = "一个用 Rust 编写的galgame引擎，ngal引擎的egui版本"
+readme = "README_en.md"
+homepage = "https://nasyt.hoha.top"
+repository = "https://github.com/nasyt233/ngal"
+license = "MIT OR Apache-2.0"
+authors = ["nasyt"]
+keywords = ["ngal", "nasyt", "galgame", "game", "game-engines"]
 
 [dependencies]
 eframe = "0.31"
